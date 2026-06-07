@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey Line Planner</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static/font/lucide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="brand"><div class="logo"><img src="logo.png" alt="Survey Line Planner"></div><div><h1>Survey Line Planner</h1><p>Geometry-based MBES planning · IHO S-44 aware</p></div></div>
+    <div class="hero-actions">
+
+      <button id="loadExample" class="primary">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>
+        </svg>
+         <span>Load Example</span>
+      </button>
+
+      <button id="resetBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/>
+          <path d="M3 3v6h6"/>
+        </svg>
+         <span>Reset</span>
+      </button>
+
+      <button id="copyBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"/>
+          <rect x="2" y="2" width="13" height="13" rx="2"/>
+        </svg>
+       <span>Copy</span>
+      </button>
+
+      <button id="shareBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <path d="M8.6 13.5l6.8 4"/>
+          <path d="M15.4 6.5l-6.8 4"/>
+        </svg>
+         <span>Share</span>
+      </button>
+
+      <button id="exportBtn" class="primary">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3v12"/>
+          <path d="M7 10l5 5 5-5"/>
+          <path d="M5 21h14"/>
+        </svg>
+         <span>Export JSON</span>
+      </button>
+
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar">
+      <details class="panel">
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><h2>1. Survey Requirements</h2>
+        </summary>
+        <label>IHO Order<select id="ihoOrder"></select></label>
+        <div class="grid2">
+          <label>Grid cell (m)<input id="cellSize" type="number" step="0.1"></label>
+          <label>Soundings/Cell<input id="requiredSpc" type="number" step="1"></label>
+        </div>
+        <div class="grid2 align-end">
+          <label>Compliance %<input id="compliance" type="number" step="1"></label>
+          <div class="locked-search"><span>Full seafloor</span><strong id="fullSearchBadge">AUTO</strong></div>
+        </div>
+        <div id="ihoRecommendation" class="recommend-note"></div>
+      </details>
+
+      <details class="panel highlight-step">
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 7c3 2 6 2 9 0s6-2 9 0"/><path d="M3 12c3 2 6 2 9 0s6-2 9 0"/><path d="M3 17c3 2 6 2 9 0s6-2 9 0"/></svg></span><h2>2. Environment First</h2>
+        </summary>
+        <p class="hint">Enter depth and conditions before sonar settings so the app can recommend frequency, swath angle, range, overlap, and ping rate.</p>
+        <div class="grid2">
+          <label>Average depth (m)<input id="depth" type="number" step="0.1"></label>
+          <label>Minimum depth (m)<input id="minDepth" type="number" step="0.1"></label>
+        </div>
+        <div class="grid2">
+          <label>Maximum depth (m)<input id="maxDepth" type="number" step="0.1"></label>
+          <label>Planning depth source<select id="planningDepthSource"></select></label>
+        </div>
+        <div class="grid2">
+          <label>Sea state<select id="seaState"></select></label>
+          <label>Bottom slope<select id="bottomSlope"></select></label>
+        </div>
+        <label>Bottom return<select id="bottomReturn"></select></label>
+      </details>
+
+      <details class="panel">
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .3 2l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.8 1.8 0 0 0-2-.3 1.8 1.8 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.8 1.8 0 0 0-1-1.6 1.8 1.8 0 0 0-2 .3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.8 1.8 0 0 0 .3-2 1.8 1.8 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.8 1.8 0 0 0 1.6-1 1.8 1.8 0 0 0-.3-2l-.1-.1A2 2 0 1 1 7.1 3l.1.1a1.8 1.8 0 0 0 2 .3h.1A1.8 1.8 0 0 0 10.9 2V2a2 2 0 1 1 4 0v.1a1.8 1.8 0 0 0 1 1.6 1.8 1.8 0 0 0 2-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.8 1.8 0 0 0-.3 2v.1a1.8 1.8 0 0 0 1.6 1H22a2 2 0 1 1 0 4h-.1a1.8 1.8 0 0 0-1.6 1z"/></svg></span><h2>3. Sonar Settings</h2>
+        </summary>
+        <label>Sonar model<select id="sonarModel"></select></label>
+        <div id="sonarReason" class="recommend-note"></div>
+        <div class="grid2">
+          <label>Frequency (kHz)<input id="frequency" type="number" step="1"></label>
+          <label>Swath angle (°)<input id="swathAngle" type="number" step="1"></label>
+        </div>
+        <div class="field-status grid2"><span id="freqStatus"></span><span id="angleStatus"></span></div>
+        <div class="grid2">
+          <label>Beam count
+            <select id="beamCount">
+              <option value="512">512</option>
+              <option value="1024">1024</option>
+            </select>
+          </label>
+          <label>Ping rate (Hz)<input id="pingRate" type="number" step="1"></label>
+        </div>
+        <div class="field-status grid2"><span id="beamStatus"></span><span id="pingStatus"></span></div>
+        <div class="grid2">
+          <label>Max range (m)<input id="maxRange" type="number" step="1"></label>
+          <label>Beam spacing<select id="beamMode"></select></label>
+        </div>
+        <div class="field-status grid2"><span id="rangeStatus"></span><span id="modeStatus"></span></div>
+        <button id="applySonarRecommendations" class="wide subtle">Apply Recommended Sonar Settings</button>
+      </details>
+
+      <details class="panel">
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 17h18"/><path d="M5 17l2-7h10l2 7"/><path d="M9 10V6h6v4"/><path d="M7 21c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0"/></svg></span><h2>4. Vessel & Planning</h2>
+        </summary>
+        <div class="grid2">
+          <label>Speed (kn)<input id="speed" type="number" step="0.1"></label>
+          <label>Overlap (%)<input id="overlap" type="number" step="1"></label>
+        </div>
+        <div class="field-status grid2"><span id="speedStatus"></span><span id="overlapStatus"></span></div>
+        <div class="grid2">
+          <label>Turn time (min)<input id="turnTime" type="number" step="0.1"></label>
+          <label>Add allowance (%)<input id="opsAllowance" type="number" step="1"></label>
+        </div>
+        <label>Crossline %<input id="crosslinePercent" type="number" step="1"></label>
+        <div id="planningRecommendation" class="recommend-note"></div>
+      </details>
+
+      <details class="panel area-bottom">
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></span><h2>5. Survey Area</h2>
+        </summary>
+        <p class="hint">Area is placed last because spacing, speed, and sonar settings are chosen first; the area then determines line count and time.</p>
+        <div class="grid2">
+          <label>Length (m)<input id="areaLength" type="number" step="1"></label>
+          <label>Width (m)<input id="areaWidth" type="number" step="1"></label>
+        </div>
+        <div class="grid3">
+          <label>Azimuth (°)<input id="azimuth" type="number" step="1"></label>
+          <label>Run-in (m)<input id="runIn" type="number" step="1"></label>
+          <label>Run-out (m)<input id="runOut" type="number" step="1"></label>
+        </div>
+      </details>
+      <div class="sidebar-footer">
+        All calculations update live.
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <nav class="tabs">
+        <button class="tab active" data-tab="summary">◔ Summary</button>
+        <button class="tab" data-tab="recommendations">✦ Inputs</button>
+        <button class="tab" data-tab="swath">△ Swath</button>
+        <button class="tab" data-tab="density">▦ Density</button>
+        <button class="tab" data-tab="lines">☰ Lines</button>
+        <button class="tab" data-tab="crosslines">✕ Crosslines</button>
+      </nav>
+      <div id="tabContent"></div>
+      <div class="workspace-footer">
+        Planning estimates only. Final survey design must consider contract specifications, IHO S-44, national requirements, sonar manufacturer limits, vessel motion, sound velocity, weather, and field QC.
+      </div>
+    </section>
+
+    <aside class="rightbar">
+      <section class="map-card">
+        <div class="map-head"><div><h3>Line Plan Preview</h3><p>Schematic — not to GIS scale</p></div><span id="azBadge">AZ 000°</span></div>
+        <svg id="planSvg" viewBox="0 0 420 420" role="img" aria-label="Line plan schematic"></svg>
+        <div class="legend"><span><i class="mainline"></i>Main line</span><span><i class="crossline"></i>Crossline</span><span><i class="area"></i>Survey area</span></div>
+      </section>
+      <section class="map-card quick"><h3>Quick facts</h3><div id="quickFacts"></div></section>
+      <section class="map-card"><h3>Warnings & Guidance</h3><div id="warnings"></div></section>
+    </aside>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
