@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="hero">
-    <div class="brand"><div class="logo"><img src="logo.png" alt="Survey Line Planner"></div><div><h1>Survey Line Planner</h1><p>Geometry-based MBES planning · IHO S-44 aware</p></div></div>
+    <div class="brand"><div class="logo"><img src="logo.png" alt="Survey Line Planner"></div><div><h1>Survey Line Planner</h1><p class="subtitle">Geometry-based MBES planning · IHO S-44 aware</p></div></div>
     <div class="hero-actions">
 
       <button id="loadExample" class="primary">
@@ -46,15 +46,30 @@
          <span>Share</span>
       </button>
 
-      <button id="exportBtn" class="primary">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3v12"/>
-          <path d="M7 10l5 5 5-5"/>
-          <path d="M5 21h14"/>
-        </svg>
-         <span>Export JSON</span>
-      </button>
+      <div class="export-menu">
+        <button id="exportBtn" class="primary" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v12"/>
+            <path d="M7 10l5 5 5-5"/>
+            <path d="M5 21h14"/>
+          </svg>
+          <span>Export</span>
+          <span class="chevron">▾</span>
+        </button>
 
+        <div id="exportMenu" class="export-dropdown">
+          <button id="exportJsonBtn" type="button">Summary JSON</button>
+          <button id="exportPdfBtn" type="button">Line Plan Report PDF</button>
+        </div>
+      </div>
+
+      <button id="manualBtn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+        </svg>
+        <span>Manual</span>
+      </button>
     </div>
   </header>
 
@@ -69,29 +84,34 @@
           <label>Soundings/Cell<input id="requiredSpc" type="number" step="1"></label>
         </div>
         <div class="grid2 align-end">
-          <label>Compliance %<input id="compliance" type="number" step="1"></label>
-          <div class="locked-search"><span>Full seafloor</span><strong id="fullSearchBadge">AUTO</strong></div>
+          <label title="Informational only. Displayed for planning documentation.">
+            Compliance (%)<input id="compliance" type="number" step="1">
+          </label>
+          <div class="locked-search"><span>Full seafloor search</span><strong id="fullSearchBadge">AUTO</strong></div>
         </div>
         <div id="ihoRecommendation" class="recommend-note"></div>
       </details>
 
       <details class="panel highlight-step">
-        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 7c3 2 6 2 9 0s6-2 9 0"/><path d="M3 12c3 2 6 2 9 0s6-2 9 0"/><path d="M3 17c3 2 6 2 9 0s6-2 9 0"/></svg></span><h2>2. Environment First</h2>
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 7c3 2 6 2 9 0s6-2 9 0"/><path d="M3 12c3 2 6 2 9 0s6-2 9 0"/><path d="M3 17c3 2 6 2 9 0s6-2 9 0"/></svg></span><h2>2. Environment Conditiona</h2>
         </summary>
-        <p class="hint">Enter depth and conditions before sonar settings so the app can recommend frequency, swath angle, range, overlap, and ping rate.</p>
+        <label>Average depth (m)<input id="depth" type="number" step="0.1"></label>
         <div class="grid2">
-          <label>Average depth (m)<input id="depth" type="number" step="0.1"></label>
-          <label>Minimum depth (m)<input id="minDepth" type="number" step="0.1"></label>
+          <label>Min depth (m)<input id="minDepth" type="number" step="0.1"></label>
+          <label>Max depth (m)<input id="maxDepth" type="number" step="0.1"></label>
         </div>
         <div class="grid2">
-          <label>Maximum depth (m)<input id="maxDepth" type="number" step="0.1"></label>
-          <label>Planning depth source<select id="planningDepthSource"></select></label>
-        </div>
-        <div class="grid2">
+          <label>Depth source<select id="planningDepthSource"></select></label>
           <label>Sea state<select id="seaState"></select></label>
-          <label>Bottom slope<select id="bottomSlope"></select></label>
         </div>
-        <label>Bottom return<select id="bottomReturn"></select></label>
+        <div class="grid2">
+          <label>Bottom slope<select id="bottomSlope"></select></label>
+          <label>Bottom return<select id="bottomReturn"></select></label>
+        </div>
+        
+        <p class="hint">
+          Depth controls swath and slant range. Sea state and bottom slope affect the recommended swath angle. Bottom return affects usable swath.
+       </p>
       </details>
 
       <details class="panel">
@@ -100,7 +120,7 @@
         <label>Sonar model<select id="sonarModel"></select></label>
         <div id="sonarReason" class="recommend-note"></div>
         <div class="grid2">
-          <label>Frequency (kHz)<input id="frequency" type="number" step="1"></label>
+          <label>Frequency (kHz)<select id="frequency"></select></label>
           <label>Swath angle (°)<input id="swathAngle" type="number" step="1"></label>
         </div>
         <div class="field-status grid2"><span id="freqStatus"></span><span id="angleStatus"></span></div>
@@ -111,7 +131,7 @@
               <option value="1024">1024</option>
             </select>
           </label>
-          <label>Ping rate (Hz)<input id="pingRate" type="number" step="1"></label>
+          <label>Ping rate (Hz)<input id="pingRate" type="number" min="1" max="50" step="1"></label>
         </div>
         <div class="field-status grid2"><span id="beamStatus"></span><span id="pingStatus"></span></div>
         <div class="grid2">
@@ -120,10 +140,13 @@
         </div>
         <div class="field-status grid2"><span id="rangeStatus"></span><span id="modeStatus"></span></div>
         <button id="applySonarRecommendations" class="wide subtle">Apply Recommended Sonar Settings</button>
+        <p class="hint">
+          Sonar settings control frequency, planning range, swath angle, soundings per ping, beam spacing, and density calculations.
+        </p>
       </details>
 
       <details class="panel">
-        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 17h18"/><path d="M5 17l2-7h10l2 7"/><path d="M9 10V6h6v4"/><path d="M7 21c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0"/></svg></span><h2>4. Vessel & Planning</h2>
+        <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M3 17h18"/><path d="M5 17l2-7h10l2 7"/><path d="M9 10V6h6v4"/><path d="M7 21c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0"/></svg></span><h2>4. Vessel & Planning Parameters</h2>
         </summary>
         <div class="grid2">
           <label>Speed (kn)<input id="speed" type="number" step="0.1"></label>
@@ -136,12 +159,14 @@
         </div>
         <label>Crossline %<input id="crosslinePercent" type="number" step="1"></label>
         <div id="planningRecommendation" class="recommend-note"></div>
+        <p class="hint">
+          Vessel speed affects along-track spacing, density, maximum speed, and survey duration.
+        </p>
       </details>
 
       <details class="panel area-bottom">
         <summary class="panel-title"><span class="panel-icon"><svg viewBox="0 0 24 24"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></span><h2>5. Survey Area</h2>
         </summary>
-        <p class="hint">Area is placed last because spacing, speed, and sonar settings are chosen first; the area then determines line count and time.</p>
         <div class="grid2">
           <label>Length (m)<input id="areaLength" type="number" step="1"></label>
           <label>Width (m)<input id="areaWidth" type="number" step="1"></label>
@@ -151,20 +176,29 @@
           <label>Run-in (m)<input id="runIn" type="number" step="1"></label>
           <label>Run-out (m)<input id="runOut" type="number" step="1"></label>
         </div>
+        <p class="hint">
+          Area dimensions determine survey line count, total line length, crossline spacing, and estimated duration.
+        </p>
       </details>
       <div class="sidebar-footer">
         All calculations update live.
       </div>
     </aside>
-
+    <div class="main-scroll">
     <section class="workspace">
       <nav class="tabs">
-        <button class="tab active" data-tab="summary">◔ Summary</button>
-        <button class="tab" data-tab="recommendations">✦ Inputs</button>
-        <button class="tab" data-tab="swath">△ Swath</button>
-        <button class="tab" data-tab="density">▦ Density</button>
-        <button class="tab" data-tab="lines">☰ Lines</button>
-        <button class="tab" data-tab="crosslines">✕ Crosslines</button>
+        <button class="tab active" data-tab="summary"><span class="tab-icon">◔</span>
+  <span class="tab-text">Summary</span></button>
+        <button class="tab" data-tab="recommendations"><span class="tab-icon">✦</span>
+  <span class="tab-text">Inputs</span></button>
+        <button class="tab" data-tab="swath"><span class="tab-icon">△</span>
+  <span class="tab-text">Swath</span></button>
+        <button class="tab" data-tab="density"><span class="tab-icon">▦</span>
+  <span class="tab-text">Density</span></button>
+        <button class="tab" data-tab="lines"><span class="tab-icon">☰</span>
+  <span class="tab-text">Lines</span></button>
+        <button class="tab" data-tab="crosslines"><span class="tab-icon">✕</span>
+  <span class="tab-text">Crosslines</span></button>
       </nav>
       <div id="tabContent"></div>
       <div class="workspace-footer">
@@ -181,6 +215,7 @@
       <section class="map-card quick"><h3>Quick facts</h3><div id="quickFacts"></div></section>
       <section class="map-card"><h3>Warnings & Guidance</h3><div id="warnings"></div></section>
     </aside>
+    </div>
   </main>
   <script src="app.js"></script>
 </body>
